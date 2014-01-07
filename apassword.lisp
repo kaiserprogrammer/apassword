@@ -39,21 +39,18 @@
              (format s "An Empty Password Hash was retrieved"))))
 
 (defun blank? (text)
-  (not (and text (> (length text) 0))))
-
-(defun corrupt-password? (str)
-  (or (not (stringp str))
-      (blank? str)))
+  (or (not (stringp text))
+      (not (and text (> (length text) 0)))))
 
 (defun hash (password &key (hasher #'default-hasher))
-  (if (corrupt-password? password)
+  (if (blank? password)
       (error 'empty-password)
       (funcall hasher password)))
 
 (defun check (password hash &key (checker #'default-checker))
-  (if (corrupt-password? password)
+  (if (blank? password)
       (error 'empty-password)
-      (if (corrupt-password? hash)
+      (if (blank? hash)
           (error 'empty-hash)
           (unless (funcall checker password hash)
             (error 'invalid-password :invalid-password password)))))
