@@ -7,10 +7,12 @@
 (in-package :apassword)
 
 (defun default-hasher (password)
+  (declare (type string password))
   (ironclad:pbkdf2-hash-password-to-combined-string
    (ironclad:ascii-string-to-byte-array password)))
 
 (defun default-checker (password hash)
+  (declare (type string password hash))
   (unless (and (> (length hash) 6) (string= "PBKDF2" (subseq hash 0 6)))
     (error 'invalid-hash))
   (ironclad:pbkdf2-check-password
@@ -18,9 +20,10 @@
    hash))
 
 (define-condition invalid-password (error)
-  ((invalid-password :accessor password :initarg :invalid-password))
+  ()
   (:report (lambda (c s)
-             (format s "Password does not match: ~s" (password c)))))
+             (declare (ignore c))
+             (format s "Password does not match"))))
 
 (define-condition invalid-hash (error)
   ()
@@ -38,19 +41,18 @@
              (declare (ignore c))
              (format s "An Empty Password Hash was retrieved"))))
 
-(defun blank? (text)
-  (or (not (stringp text))
-      (not (and text (> (length text) 0)))))
+(defun empty? (text)
+  (not (and text (> (length text) 0))))
 
 (defun hash (password &key (hasher #'default-hasher))
-  (if (blank? password)
+  (declare (type string password))
+  (if (empty? password)
       (error 'empty-password)
       (funcall hasher password)))
 
 (defun check (password hash &key (checker #'default-checker))
-  (if (blank? password)
-      (error 'empty-password)
-      (if (blank? hash)
-          (error 'empty-hash)
-          (unless (funcall checker password hash)
-            (error 'invalid-password :invalid-password password)))))
+  (declare (type string password hash))
+  (cond ((empty? password) (error 'empty-password))
+        ((empty? hash) (error 'empty-hash))
+        ((funcall checker password hash))
+        (t (error 'invalid-password))))
