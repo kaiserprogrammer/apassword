@@ -45,13 +45,11 @@
   (not (and text (> (length text) 0))))
 
 (defun hash (password &key (hasher #'default-hasher))
-  (declare (type string password))
   (if (empty? password)
       (error 'empty-password)
       (funcall hasher password)))
 
 (defun check (password hash &key (checker #'default-checker))
-  (declare (type string password hash))
   (cond ((empty? password) (error 'empty-password))
         ((empty? hash) (error 'empty-hash))
         ((funcall checker password hash))
