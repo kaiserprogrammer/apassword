@@ -30,11 +30,13 @@
   (:report (lambda (c s)
              (declare (ignore c))
              (format s "Wrong Hash given to check"))))
+
 (define-condition empty-password (error)
   ()
   (:report (lambda (c s)
              (declare (ignore c))
              (format s "An Empty Password is not allowed"))))
+
 (define-condition empty-hash (error)
   ()
   (:report (lambda (c s)
@@ -44,11 +46,15 @@
 (defun empty? (text)
   (not (and text (> (length text) 0))))
 
+;;; hash a given password to obscure its content so it would take a
+;;; lot of time to guess it right
 (defun hash (password &key (hasher #'default-hasher))
   (if (empty? password)
       (error 'empty-password)
       (funcall hasher password)))
 
+;;; given a password and hash it will hash the password and check if
+;;; its content is the same as the given hash
 (defun check (password hash &key (checker #'default-checker))
   (cond ((empty? password) (error 'empty-password))
         ((empty? hash) (error 'empty-hash))
