@@ -39,7 +39,7 @@
   ()
   (:report (lambda (c s)
              (declare (ignore c))
-             (format s "An Empty Password Hash was retrieved"))))
+             (format s "An Empty Hash is not allowed"))))
 
 (defun empty? (text)
   (not (and text (> (length text) 0))))
